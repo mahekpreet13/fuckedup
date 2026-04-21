@@ -33,7 +33,7 @@ cd RideShareX
 
 mvn clean install
 
-cp src/resources/application.properties.template src/resources/application.properties
+cp RideShareX/src/resources/application.properties.template RideShareX/src/resources/application.properties
 
 # open terminal to run a sql instance
 mysql -u root -p

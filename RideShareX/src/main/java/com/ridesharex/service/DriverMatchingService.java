@@ -32,11 +32,6 @@ public class DriverMatchingService {
 
         System.out.println("Drivers found: " + drivers.size());
 
-        if (drivers.isEmpty()) {
-            System.out.println("❌ No drivers available");
-            return null;
-        }
-
         double minDistance = Double.MAX_VALUE;
         Long bestDriverId = null;
 
@@ -57,8 +52,8 @@ public class DriverMatchingService {
            double distance = calculateDistance(
     driver.getCurrentLatitude(),
     driver.getCurrentLongitude(),
-    rideRequest.getPickupLatitude(),   // ✅ FIX
-    rideRequest.getPickupLongitude()   // ✅ FIX
+    rideRequest.getPickupLatitude(),
+    rideRequest.getPickupLongitude()
 );
 
             System.out.println("Distance to driver: " + distance);
@@ -67,6 +62,30 @@ public class DriverMatchingService {
                 minDistance = distance;
                 bestDriverId = driver.getId();
             }
+        }
+
+        if (bestDriverId == null) {
+            System.out.println("❌ No real drivers matched. Mocking one for showcase...");
+            User mockDriver = userRepository.findByUsername("showcase_driver").orElse(null);
+            
+            double pLat = rideRequest.getPickupLatitude() != null ? rideRequest.getPickupLatitude() : 0.0;
+            double pLng = rideRequest.getPickupLongitude() != null ? rideRequest.getPickupLongitude() : 0.0;
+
+            if (mockDriver == null) {
+                mockDriver = new User();
+                mockDriver.setUsername("showcase_driver");
+                mockDriver.setPassword("password");
+                mockDriver.setEmail("driver@showcase.com");
+                mockDriver.setRole("DRIVER");
+                mockDriver.setIsDriverAvailable(true);
+            }
+            
+            // Place the mock driver slightly away from the user's pickup
+            mockDriver.setCurrentLatitude(pLat + 0.005);
+            mockDriver.setCurrentLongitude(pLng + 0.005);
+            
+            mockDriver = userRepository.save(mockDriver);
+            bestDriverId = mockDriver.getId();
         }
 
         System.out.println("✅ Selected Driver ID: " + bestDriverId);
